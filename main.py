@@ -73,21 +73,16 @@ trip_miles > 0 and
 trip_total > 3 and
 pickup_community_area is not NULL and 
 dropoff_community_area is not NULL"""
-job = client.query(query)
-df = job.to_dataframe()
 
-# check the dataframe's shape
-print(df.shape)
-# check the columns in the dataframe
-df.columns
+job = client.query(query)  # 使用 BigQuery 客户端提交SQL查询任务
+df = job.to_dataframe()   # 将查询结果转成 Pandas DataFrame 方便数据分析
 
-df.head()
-
-df.dtypes
-
-df.info()
-
-df.describe().T
+print(df.shape)           # 输出数据维度（行数和列数）
+df.columns                # 查看DataFrame所有列名
+df.head()                 # 显示前5条数据，快速预览内容
+df.dtypes                 # 查看每列的数据类型
+df.info()                 # 输出DataFrame详细信息（非空值数量、类型、内存）
+df.describe().T           # 对数值列做统计描述并转置，方便查看均值、标准差等指标
 
 # 你要做一个机器学习任务，目标是预测 trip_total （出租车行程总费用），这个字段就是你的目标变量（target）。
 target = "trip_total"
@@ -102,14 +97,21 @@ num_cols = ["trip_seconds", "trip_miles"]
 
 	# •	直方图（Histogram）：看数据的分布情况，比如集中在哪些值，是否偏斜，是否有多峰等。
 	# •	箱线图（Boxplot）：看数据的分布情况和异常值（离群点）。
+# 遍历数值型特征列 + 目标列
 for i in num_cols + [target]:
+    # 创建一个 1 行 2 列的图像区域（figsize=(12, 4) 表示整个图宽 12 英寸，高 4 英寸）
     _, ax = plt.subplots(1, 2, figsize=(12, 4))
-    df[i].plot(kind="hist", bins=100, ax=ax[0])
-    ax[0].set_title(str(i) + " -Histogram")
-    df[i].plot(kind="box", ax=ax[1])
-    ax[1].set_title(str(i) + " -Boxplot")
+    
+    # 绘制直方图（Histogram）
+    df[i].plot(kind="hist", bins=100, ax=ax[0])  # bins=100 表示分成 100 个柱子
+    ax[0].set_title(str(i) + " -Histogram")     # 设置直方图标题
+    
+    # 绘制箱型图（Boxplot）
+    df[i].plot(kind="box", ax=ax[1])             # 直接在右侧子图画箱线图
+    ax[1].set_title(str(i) + " -Boxplot")        # 设置箱型图标题
+    
+    # 显示当前图像
     plt.show()
-    # input("Press Enter to close...")  # 让窗口保持，防止立即关闭
 
 # trip_seconds 是行程时间，单位是秒。为了分析更方便，把它换算成小时：
 df["trip_hours"] = round(df["trip_seconds"] / 3600, 2)
@@ -300,7 +302,7 @@ model = aiplatform.Model.upload(
     display_name=MODEL_DISPLAY_NAME,                      # 模型显示名称
     artifact_uri=ARTIFACT_GCS_PATH,                        # 模型文件路径
     serving_container_image_uri="us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-0:latest",  # 使用的预测容器镜像（sklearn CPU版）
-    explanation_metadata=exp_metadata,                     # 解释元数据
+    explanation_metadata=exp_metadata,                     # 解释元数据,请求和响应参数
     explanation_parameters=ExplanationParameters(          # 解释参数，使用Sampled Shapley值解释
         sampled_shapley_attribution=SampledShapleyAttribution(path_count=25)
     ),

@@ -1,0 +1,7 @@
+title: ParametersSchema
+type: object
+properties:
+  top_k:
+    type: integer
+    description: "Return top-k predictions"
+    default: 1

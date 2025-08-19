@@ -1,0 +1,16 @@
+title: PredictionSchema
+type: object
+properties:
+  class_id:
+    type: integer
+    description: "Predicted class ID"
+  class_name:
+    type: string
+    description: "Predicted class label"
+  confidence:
+    type: number
+    format: float
+    description: "Prediction confidence score"
+required:
+  - class_id
+  - class_name

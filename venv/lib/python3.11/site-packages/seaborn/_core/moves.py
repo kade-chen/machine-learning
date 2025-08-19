@@ -1,12 +1,15 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import ClassVar, Callable, Optional, Union
+from typing import ClassVar, Callable, Optional, Union, cast
 
 import numpy as np
 from pandas import DataFrame
 
 from seaborn._core.groupby import GroupBy
 from seaborn._core.scales import Scale
+from seaborn._core.typing import Default
+
+default = Default()
 
 
 @dataclass
@@ -24,26 +27,34 @@ class Move:
 @dataclass
 class Jitter(Move):
     """
-    Random displacement of marks along either or both axes to reduce overplotting.
+    Random displacement along one or both axes to reduce overplotting.
+
+    Parameters
+    ----------
+    width : float
+        Magnitude of jitter, relative to mark width, along the orientation axis.
+        If not provided, the default value will be 0 when `x` or `y` are set, otherwise
+        there will be a small amount of jitter applied by default.
+    x : float
+        Magnitude of jitter, in data units, along the x axis.
+    y : float
+        Magnitude of jitter, in data units, along the y axis.
+
+    Examples
+    --------
+    .. include:: ../docstrings/objects.Jitter.rst
+
     """
-    width: float = 0
+    width: float | Default = default
     x: float = 0
     y: float = 0
-
-    seed: Optional[int] = None
-
-    # TODO what is the best way to have a reasonable default?
-    # The problem is that "reasonable" seems dependent on the mark
+    seed: int | None = None
 
     def __call__(
         self, data: DataFrame, groupby: GroupBy, orient: str, scales: dict[str, Scale],
     ) -> DataFrame:
 
-        # TODO is it a problem that GroupBy is not used for anything here?
-        # Should we type it as optional?
-
         data = data.copy()
-
         rng = np.random.default_rng(self.seed)
 
         def jitter(data, col, scale):
@@ -51,8 +62,13 @@ class Jitter(Move):
             offsets = noise * scale
             return data[col] + offsets
 
+        if self.width is default:
+            width = 0.0 if self.x or self.y else 0.2
+        else:
+            width = cast(float, self.width)
+
         if self.width:
-            data[orient] = jitter(data, orient, self.width * data["width"])
+            data[orient] = jitter(data, orient, width * data["width"])
         if self.x:
             data["x"] = jitter(data, "x", self.x)
         if self.y:
@@ -65,6 +81,19 @@ class Jitter(Move):
 class Dodge(Move):
     """
     Displacement and narrowing of overlapping marks along orientation axis.
+
+    Parameters
+    ----------
+    empty : {'keep', 'drop', 'fill'}
+    gap : float
+        Size of gap between dodged marks.
+    by : list of variable names
+        Variables to apply the movement to, otherwise use all.
+
+    Examples
+    --------
+    .. include:: ../docstrings/objects.Dodge.rst
+
     """
     empty: str = "keep"  # Options: keep, drop, fill
     gap: float = 0
@@ -125,6 +154,11 @@ class Dodge(Move):
 class Stack(Move):
     """
     Displacement of overlapping bar or area marks along the value axis.
+
+    Examples
+    --------
+    .. include:: ../docstrings/objects.Stack.rst
+
     """
     # TODO center? (or should this be a different move, eg. Stream())
 
@@ -160,6 +194,16 @@ class Stack(Move):
 class Shift(Move):
     """
     Displacement of all marks with the same magnitude / direction.
+
+    Parameters
+    ----------
+    x, y : float
+        Magnitude of shift, in data units, along each axis.
+
+    Examples
+    --------
+    .. include:: ../docstrings/objects.Shift.rst
+
     """
     x: float = 0
     y: float = 0
@@ -178,6 +222,22 @@ class Shift(Move):
 class Norm(Move):
     """
     Divisive scaling on the value axis after aggregating within groups.
+
+    Parameters
+    ----------
+    func : str or callable
+        Function called on each group to define the comparison value.
+    where : str
+        Query string defining the subset used to define the comparison values.
+    by : list of variables
+        Variables used to define aggregation groups.
+    percent : bool
+        If True, multiply the result by 100.
+
+    Examples
+    --------
+    .. include:: ../docstrings/objects.Norm.rst
+
     """
 
     func: Union[Callable, str] = "max"
