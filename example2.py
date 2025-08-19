@@ -8,7 +8,7 @@ from google.oauth2 import service_account
 # 1. 初始化配置
 PROJECT_ID = "genai-specialization-468108"  # 你的项目ID
 LOCATION = "us-central1"                     # 你的区域
-endpoint_id = "projects/601797833546/locations/us-central1/endpoints/1824875941294243840"  # 替换成你的endpoint完整资源名
+endpoint_id = "projects/601797833546/locations/us-central1/endpoints/3036590531661529088"  # 替换成你的endpoint完整资源名
 
 service_account_key_path = "/Users/kade.chen/go-kade-project/github/mcenter/etc/kade-poc.json"  # 替换成你的服务账户JSON路径
 credentials = service_account.Credentials.from_service_account_file(

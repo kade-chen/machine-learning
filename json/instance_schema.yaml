@@ -1,0 +1,20 @@
+title: InstanceSchema
+type: object
+properties:
+  sepal_length:
+    type: string
+    description: "Sepal length of iris flower"
+  sepal_width:
+    type: string
+    description: "Sepal width of iris flower"
+  petal_length:
+    type: string
+    description: "Petal length of iris flower"
+  petal_width:
+    type: string
+    description: "Petal width of iris flower"
+required:
+  - sepal_length
+  - sepal_width
+  - petal_length
+  - petal_width
