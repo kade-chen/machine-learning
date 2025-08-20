@@ -39,3 +39,6 @@ python3.11 -m pip install seaborn
 - model upload
 - create endpoint
 - deploy endpoint
+
+
+2222222
