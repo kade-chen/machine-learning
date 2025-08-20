@@ -40,4 +40,3 @@ python3.11 -m pip install seaborn
 - create endpoint
 - deploy endpoint
 
-122222
