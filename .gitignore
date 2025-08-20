@@ -1,2 +1,5 @@
 # .gitignore
+# 忽略 Python 虚拟环境
 venv/
+__pycache__/
+*.pyc
